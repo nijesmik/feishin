@@ -2,6 +2,7 @@ import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 
+import { filterColumnsForServerType } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { useItemListPagination } from '/@/renderer/components/item-list/item-list-pagination/use-item-list-pagination';
 import { ItemListHandle } from '/@/renderer/components/item-list/types';
 import { useListContext } from '/@/renderer/context/list-context';
@@ -109,6 +110,11 @@ export const PlaylistDetailSongListView = ({ data, items }: PlaylistDetailSongLi
     const { currentPage, onChange: onPageChange } = useItemListPagination();
     const isPaginated = pagination === ListPaginationType.PAGINATED;
 
+    const filteredColumns = useMemo(
+        () => filterColumnsForServerType(table.columns, server?.type),
+        [table.columns, server?.type],
+    );
+
     const paginationProps = isPaginated
         ? {
               currentPage,
@@ -132,7 +138,7 @@ export const PlaylistDetailSongListView = ({ data, items }: PlaylistDetailSongLi
             return (
                 <PlaylistDetailSongListTable
                     autoFitColumns={table.autoFitColumns}
-                    columns={table.columns}
+                    columns={filteredColumns}
                     data={data}
                     enableAlternateRowColors={table.enableAlternateRowColors}
                     enableHeader={table.enableHeader}
@@ -155,6 +161,11 @@ export const PlaylistDetailSongListEdit = ({ data }: { data: PlaylistSongListRes
     const { playlistId } = useParams() as { playlistId: string };
     const server = useCurrentServer();
     const { display, table } = useListSettings(ItemListKey.PLAYLIST_SONG);
+
+    const filteredTableColumns = useMemo(
+        () => filterColumnsForServerType(table.columns, server?.type),
+        [table.columns, server?.type],
+    );
 
     const [localData, setLocalData] = useState<PlaylistSongListResponse>(data);
 
@@ -248,9 +259,9 @@ export const PlaylistDetailSongListEdit = ({ data }: { data: PlaylistSongListRes
                 pinned: 'left' as 'left' | 'right' | null,
                 width: 100,
             },
-            ...table.columns,
+            ...filteredTableColumns,
         ];
-    }, [table.columns]);
+    }, [filteredTableColumns]);
 
     const { setListData } = useListContext();
 
