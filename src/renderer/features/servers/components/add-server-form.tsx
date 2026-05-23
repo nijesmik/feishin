@@ -12,6 +12,7 @@ import {
 import JellyfinIcon from '/@/renderer/features/servers/assets/jellyfin.png';
 import NavidromeIcon from '/@/renderer/features/servers/assets/navidrome.png';
 import SubsonicIcon from '/@/renderer/features/servers/assets/opensubsonic.png';
+import YouTubeIcon from '/@/renderer/features/servers/assets/youtube.svg';
 import { IgnoreCorsSslSwitches } from '/@/renderer/features/servers/components/ignore-cors-ssl-switches';
 import { useAuthStoreActions, useServerList } from '/@/renderer/store';
 import { Checkbox } from '/@/shared/components/checkbox/checkbox';
@@ -27,6 +28,8 @@ import { Text } from '/@/shared/components/text/text';
 import { toast } from '/@/shared/components/toast/toast';
 import { useFocusTrap } from '/@/shared/hooks/use-focus-trap';
 import { useForm } from '/@/shared/hooks/use-form';
+import { setYouTubeOAuthPending } from '/@/renderer/hooks/use-youtube-oauth-callback';
+import { Button } from '/@/shared/components/button/button';
 import { AuthenticationResponse, ServerListItemWithCredential } from '/@/shared/types/domain-types';
 import { DiscoveredServerItem, ServerType, toServerType } from '/@/shared/types/types';
 
@@ -83,6 +86,10 @@ const SERVER_TYPES: Record<ServerType, ServerDetails> = {
         icon: SubsonicIcon,
         name: 'OpenSubsonic',
     },
+    [ServerType.YOUTUBE]: {
+        icon: YouTubeIcon,
+        name: 'YouTube',
+    },
 };
 
 const ALL_SERVERS = Object.keys(SERVER_TYPES).map((serverType) => {
@@ -122,10 +129,17 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
         },
     });
 
-    const isSubmitDisabled = !form.values.name || !form.values.url || !form.values.username;
+    const isYouTube = form.values.type === ServerType.YOUTUBE;
+    const isSubmitDisabled = !form.values.name || !form.values.url || (!isYouTube && !form.values.username);
 
     const fillServerDetails = (server: DiscoveredServerItem) => {
         form.setValues({ ...server });
+    };
+
+    const handleGoogleLogin = () => {
+        const serverUrl = form.values.url.replace(/\/$/, '');
+        setYouTubeOAuthPending(serverUrl, form.values.name);
+        window.location.href = `${serverUrl}/auth/google/login`;
     };
 
     const handleSubmit = form.onSubmit(async (values) => {
@@ -287,20 +301,24 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                             })}
                         />
                     )}
-                    <TextInput
-                        label={t('form.addServer.input', {
-                            context: 'username',
-                        })}
-                        required
-                        {...form.getInputProps('username')}
-                    />
-                    <PasswordInput
-                        label={t('form.addServer.input', {
-                            context: 'password',
-                        })}
-                        {...form.getInputProps('password')}
-                    />
-                    {localSettings && form.values.type === ServerType.NAVIDROME && (
+                    {!isYouTube && (
+                        <>
+                            <TextInput
+                                label={t('form.addServer.input', {
+                                    context: 'username',
+                                })}
+                                required
+                                {...form.getInputProps('username')}
+                            />
+                            <PasswordInput
+                                label={t('form.addServer.input', {
+                                    context: 'password',
+                                })}
+                                {...form.getInputProps('password')}
+                            />
+                        </>
+                    )}
+                    {!isYouTube && localSettings && form.values.type === ServerType.NAVIDROME && (
                         <Checkbox
                             label={t('form.addServer.input', {
                                 context: 'savePassword',
@@ -343,14 +361,24 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                         {onCancel && (
                             <ModalButton onClick={onCancel}>{t('common.cancel')}</ModalButton>
                         )}
-                        <ModalButton
-                            disabled={isSubmitDisabled}
-                            loading={isLoading}
-                            type="submit"
-                            variant="filled"
-                        >
-                            {t('common.add')}
-                        </ModalButton>
+                        {isYouTube ? (
+                            <Button
+                                disabled={!form.values.url}
+                                onClick={handleGoogleLogin}
+                                variant="filled"
+                            >
+                                Login with Google
+                            </Button>
+                        ) : (
+                            <ModalButton
+                                disabled={isSubmitDisabled}
+                                loading={isLoading}
+                                type="submit"
+                                variant="filled"
+                            >
+                                {t('common.add')}
+                            </ModalButton>
+                        )}
                     </Group>
                 </Stack>
             </form>

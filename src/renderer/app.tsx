@@ -14,6 +14,7 @@ import { WebAudioContext } from '/@/renderer/features/player/context/webaudio-co
 import { useCheckForUpdates } from '/@/renderer/hooks/use-check-for-updates';
 import { useNativeMenuSync } from '/@/renderer/hooks/use-native-menu-sync';
 import { useSyncSettingsToMain } from '/@/renderer/hooks/use-sync-settings-to-main';
+import { useYouTubeOAuthCallback } from '/@/renderer/hooks/use-youtube-oauth-callback';
 import { AppRouter } from '/@/renderer/router/app-router';
 import { useCssSettings, useHotkeySettings, useLanguage } from '/@/renderer/store';
 import { useAppTheme } from '/@/renderer/themes/use-app-theme';
@@ -85,6 +86,11 @@ const AppShell = memo(function AppShell() {
     );
 });
 
+const YouTubeOAuthEffect = () => {
+    useYouTubeOAuthCallback();
+    return null;
+};
+
 const AppEffects = () => (
     <>
         <SyncSettingsEffect />
@@ -93,6 +99,7 @@ const AppEffects = () => (
         <GlobalShortcutsEffect />
         <LanguageEffect />
         <NativeMenuSyncEffect />
+        <YouTubeOAuthEffect />
     </>
 );
 
