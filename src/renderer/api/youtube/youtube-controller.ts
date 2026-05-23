@@ -163,7 +163,7 @@ const mapTrackToSong = (track: YouTubeTrack, serverId: string): Song => {
         artistName: artist,
         artists: [
             {
-                id: artist,
+                id: track.channel_title,
                 imageId: null,
                 imageUrl: null,
                 name: artist,
@@ -234,9 +234,7 @@ const mapPlaylistSummary = (pl: YouTubePlaylistSummary, serverId: string): Playl
 };
 
 const cleanArtistName = (name: string): string => {
-    const isTopic = name.endsWith(' - Topic');
-    const clean = isTopic ? name.replace(/ - Topic$/, '') : name;
-    return isTopic ? `${clean} ✓` : clean;
+    return name.replace(/ - Topic$/, '');
 };
 
 const notImplemented = (name: string) => {
@@ -460,7 +458,7 @@ export const YouTubeController: InternalControllerEndpoint = {
             artistName: artist,
             artists: [
                 {
-                    id: artist,
+                    id: item.channel_title,
                     imageId: null,
                     imageUrl: null,
                     name: artist,

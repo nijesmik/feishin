@@ -12,6 +12,7 @@ import {
     JOINED_ARTISTS_MUTED_PROPS,
     JoinedArtists,
 } from '/@/renderer/features/albums/components/joined-artists';
+import { VerifiedArtistBadge } from '/@/renderer/features/artists/components/verified-artist-badge';
 import { ContextMenuController } from '/@/renderer/features/context-menu/context-menu-controller';
 import { RadioMetadataDisplay } from '/@/renderer/features/player/components/radio-metadata-display';
 import {
@@ -271,6 +272,9 @@ export const LeftControls = () => {
                                         size: 'md',
                                     }}
                                 />
+                                {artists?.[0]?.id && (
+                                    <VerifiedArtistBadge artistId={artists[0].id} />
+                                )}
                             </div>
                             <div
                                 className={clsx(

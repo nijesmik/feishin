@@ -14,6 +14,7 @@ import {
 } from '/@/renderer/components/item-list/item-table-list/item-table-list-column';
 import { useIsActiveRow } from '/@/renderer/components/item-list/item-table-list/item-table-list-context';
 import { JoinedArtists } from '/@/renderer/features/albums/components/joined-artists';
+import { VerifiedArtistBadge } from '/@/renderer/features/artists/components/verified-artist-badge';
 import { PlayButton } from '/@/renderer/features/shared/components/play-button';
 import {
     LONG_PRESS_PLAY_BEHAVIOR,
@@ -335,6 +336,9 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
                             linkProps={{ fw: 400, isMuted: true }}
                             rootTextProps={{ fw: 400, isMuted: true, size: 'sm' }}
                         />
+                        {item.artists?.[0]?.id && (
+                            <VerifiedArtistBadge artistId={item.artists[0].id} />
+                        )}
                     </div>
                 </div>
             </TableColumnContainer>
