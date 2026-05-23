@@ -24,6 +24,7 @@ import '/@/shared/styles/global.css';
 import { PlayerProvider } from '/@/renderer/features/player/context/player-context';
 import { AudioPlayers } from '/@/renderer/features/player/components/audio-players';
 import { ReleaseNotesModal } from '/@/renderer/release-notes-modal';
+import { Agentation } from 'agentation';
 
 const UpdateAvailableDialog = lazy(() =>
     import('./update-available-dialog').then((module) => ({
@@ -82,6 +83,7 @@ const AppShell = memo(function AppShell() {
             <Suspense fallback={null}>
                 <UpdateAvailableDialog />
             </Suspense>
+            {import.meta.env.DEV && <Agentation />}
         </>
     );
 });
