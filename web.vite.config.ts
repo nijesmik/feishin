@@ -56,9 +56,6 @@ export default defineConfig({
     },
     optimizeDeps: {
         exclude: [
-            '@atlaskit/pragmatic-drag-and-drop',
-            '@atlaskit/pragmatic-drag-and-drop-auto-scroll',
-            '@atlaskit/pragmatic-drag-and-drop-hitbox',
             '@tanstack/react-query-persist-client',
             'idb-keyval',
         ],

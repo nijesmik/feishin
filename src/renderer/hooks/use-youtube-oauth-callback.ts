@@ -5,7 +5,7 @@ import { fetchMe } from '/@/renderer/api/youtube/youtube-controller';
 import { useAuthStoreActions } from '/@/renderer/store';
 import { ServerListItemWithCredential } from '/@/shared/types/domain-types';
 import { ServerType } from '/@/shared/types/types';
-import { toast } from '/@/renderer/components/toast';
+import { toast } from '/@/shared/components/toast/toast';
 import { closeAllModals } from '@mantine/modals';
 
 const YOUTUBE_PENDING_KEY = 'youtube_oauth_pending';
