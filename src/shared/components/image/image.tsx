@@ -29,7 +29,7 @@ export interface ImageProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 's
     enableViewport?: boolean;
     fetchPriority?: 'auto' | 'high' | 'low';
     imageContainerProps?: Omit<ImageContainerProps, 'children'>;
-    imageRequest?: ImageRequest;
+    imageRequest?: ImageRequest | null;
     includeLoader?: boolean;
     includeUnloader?: boolean;
     isExplicit?: boolean;
@@ -77,7 +77,10 @@ export function BaseImage({
     const { className: containerPropsClassName, ...restContainerProps } = imageContainerProps || {};
 
     const rawImageRequest = useMemo(
-        () => imageRequest ?? (src ? { cacheKey: src, url: src } : undefined),
+        () =>
+            imageRequest === undefined
+                ? (src ? { cacheKey: src, url: src } : undefined)
+                : imageRequest || undefined,
         [imageRequest, src],
     );
     const isInSessionCache = Boolean(
@@ -137,6 +140,16 @@ export function BaseImage({
                     onError={onError}
                     onLoad={onLoad}
                     src={nativeImage.displaySrc}
+                    {...props}
+                />
+            ) : src && !rawImageRequest ? (
+                <img
+                    className={clsx(styles.image, className)}
+                    decoding="async"
+                    fetchPriority={fetchPriority}
+                    onError={onError}
+                    onLoad={onLoad}
+                    src={src}
                     {...props}
                 />
             ) : !src ? (

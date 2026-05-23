@@ -149,13 +149,11 @@ export const useItemImageRequest = (args: UseItemImageUrlProps) => {
             baseUrl = server?.remoteUrl || server?.url;
         }
 
-        return (
-            api.controller.getImageRequest({
-                apiClientProps: { serverId: targetServerId },
-                baseUrl,
-                query: { id, itemType, size: size ?? sizeByType },
-            }) || undefined
-        );
+        return api.controller.getImageRequest({
+            apiClientProps: { serverId: targetServerId },
+            baseUrl,
+            query: { id, itemType, size: size ?? sizeByType },
+        });
     }, [args.serverId, id, imageUrl, itemType, serverId, size, sizeByType, useRemoteUrl]);
 };
 
@@ -186,13 +184,11 @@ export function getItemImageRequest(args: UseItemImageUrlProps) {
         baseUrl = server?.remoteUrl || server?.url;
     }
 
-    return (
-        api.controller.getImageRequest({
-            apiClientProps: { serverId },
-            baseUrl,
-            query: { id, itemType, size: size ?? sizeByType },
-        }) || undefined
-    );
+    return api.controller.getImageRequest({
+        apiClientProps: { serverId },
+        baseUrl,
+        query: { id, itemType, size: size ?? sizeByType },
+    });
 }
 
 export function getItemImageUrl(args: UseItemImageUrlProps) {
