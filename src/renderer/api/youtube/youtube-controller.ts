@@ -193,12 +193,20 @@ export const YouTubeController: InternalControllerEndpoint = {
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        const data: { items: YouTubePlaylistSummary[] } = await ytFetch(
-            `${server.url}/me/playlists`,
-            apiClientProps.signal,
-        );
+        const allPlaylists: YouTubePlaylistSummary[] = [];
+        let pageToken: string | null = null;
 
-        const found = data.items.find((p) => p.id === query.id);
+        do {
+            const url = pageToken
+                ? `${server.url}/me/playlists?pageToken=${pageToken}`
+                : `${server.url}/me/playlists`;
+            const data: { items: YouTubePlaylistSummary[]; next_page_token: string | null } =
+                await ytFetch(url, apiClientProps.signal);
+            allPlaylists.push(...data.items);
+            pageToken = data.next_page_token;
+        } while (pageToken);
+
+        const found = allPlaylists.find((p) => p.id === query.id);
         if (!found) throw new Error('Playlist not found');
 
         return mapPlaylistSummary(found, server.id);
@@ -208,10 +216,20 @@ export const YouTubeController: InternalControllerEndpoint = {
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        const data: { items: YouTubePlaylistSummary[]; next_page_token: string | null } =
-            await ytFetch(`${server.url}/me/playlists`, apiClientProps.signal);
+        const allPlaylists: YouTubePlaylistSummary[] = [];
+        let pageToken: string | null = null;
 
-        const items = data.items.map((p) => mapPlaylistSummary(p, server.id));
+        do {
+            const url = pageToken
+                ? `${server.url}/me/playlists?pageToken=${pageToken}`
+                : `${server.url}/me/playlists`;
+            const data: { items: YouTubePlaylistSummary[]; next_page_token: string | null } =
+                await ytFetch(url, apiClientProps.signal);
+            allPlaylists.push(...data.items);
+            pageToken = data.next_page_token;
+        } while (pageToken);
+
+        const items = allPlaylists.map((p) => mapPlaylistSummary(p, server.id));
 
         return {
             items,
@@ -224,24 +242,42 @@ export const YouTubeController: InternalControllerEndpoint = {
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        const data: { items: YouTubePlaylistSummary[] } = await ytFetch(
-            `${server.url}/me/playlists`,
-            apiClientProps.signal,
-        );
+        const allPlaylists: YouTubePlaylistSummary[] = [];
+        let pageToken: string | null = null;
 
-        return data.items.length;
+        do {
+            const url = pageToken
+                ? `${server.url}/me/playlists?pageToken=${pageToken}`
+                : `${server.url}/me/playlists`;
+            const data: { items: YouTubePlaylistSummary[]; next_page_token: string | null } =
+                await ytFetch(url, apiClientProps.signal);
+            allPlaylists.push(...data.items);
+            pageToken = data.next_page_token;
+        } while (pageToken);
+
+        return allPlaylists.length;
     },
     getPlaylistSongList: async (args) => {
         const { apiClientProps, query } = args;
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        const data: { items: YouTubeTrack[]; next_page_token: string | null } = await ytFetch(
-            `${server.url}/playlists/${query.id}/items`,
-            apiClientProps.signal,
-        );
+        const allTracks: YouTubeTrack[] = [];
+        let pageToken: string | null = null;
 
-        const items = data.items.map((t) => mapTrackToSong(t, server.id));
+        do {
+            const url = pageToken
+                ? `${server.url}/playlists/${query.id}/items?pageToken=${pageToken}`
+                : `${server.url}/playlists/${query.id}/items`;
+            const data: { items: YouTubeTrack[]; next_page_token: string | null } = await ytFetch(
+                url,
+                apiClientProps.signal,
+            );
+            allTracks.push(...data.items);
+            pageToken = data.next_page_token;
+        } while (pageToken);
+
+        const items = allTracks.map((t) => mapTrackToSong(t, server.id));
 
         return {
             items,
@@ -274,12 +310,22 @@ export const YouTubeController: InternalControllerEndpoint = {
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        const data: { items: YouTubeTrack[]; next_page_token: string | null } = await ytFetch(
-            `${server.url}/me/liked-music`,
-            apiClientProps.signal,
-        );
+        const allTracks: YouTubeTrack[] = [];
+        let pageToken: string | null = null;
 
-        const items = data.items.map((t) => mapTrackToSong(t, server.id));
+        do {
+            const url = pageToken
+                ? `${server.url}/me/liked-music?pageToken=${pageToken}`
+                : `${server.url}/me/liked-music`;
+            const data: { items: YouTubeTrack[]; next_page_token: string | null } = await ytFetch(
+                url,
+                apiClientProps.signal,
+            );
+            allTracks.push(...data.items);
+            pageToken = data.next_page_token;
+        } while (pageToken);
+
+        const items = allTracks.map((t) => mapTrackToSong(t, server.id));
 
         return {
             items,
