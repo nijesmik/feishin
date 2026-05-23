@@ -1,6 +1,6 @@
 import i18n from '/@/i18n/i18n';
 import { ItemGridListRowConfig, ItemTableListColumnConfig } from '/@/renderer/store';
-import { TableColumn } from '/@/shared/types/types';
+import { ServerType, TableColumn } from '/@/shared/types/types';
 
 export type DefaultTableColumn = {
     align: 'center' | 'end' | 'start';
@@ -839,4 +839,14 @@ export const pickGridRows = (
         id: column.id as TableColumn,
         isEnabled: column.isEnabled,
     }));
+};
+
+const YOUTUBE_HIDDEN_COLUMNS = new Set<string>([TableColumn.GENRE, TableColumn.GENRE_BADGE]);
+
+export const filterColumnsForServerType = <T extends { value?: string; id?: string }>(
+    columns: T[],
+    serverType?: ServerType,
+): T[] => {
+    if (serverType !== ServerType.YOUTUBE) return columns;
+    return columns.filter((c) => !YOUTUBE_HIDDEN_COLUMNS.has((c.value ?? c.id) as string));
 };

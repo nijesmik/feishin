@@ -7,6 +7,7 @@ import { useParams } from 'react-router';
 import i18n from '/@/i18n/i18n';
 import {
     ALBUM_TABLE_COLUMNS,
+    filterColumnsForServerType,
     PLAYLIST_SONG_TABLE_COLUMNS,
     SONG_TABLE_COLUMNS,
 } from '/@/renderer/components/item-list/item-table-list/default-columns';
@@ -30,6 +31,7 @@ import { FILTER_KEYS } from '/@/renderer/features/shared/utils';
 import { useContainerQuery } from '/@/renderer/hooks';
 import {
     PlaylistTarget,
+    useCurrentServer,
     useCurrentServerId,
     usePlaylistTarget,
     useSettingsStoreActions,
@@ -122,6 +124,7 @@ export const PlaylistDetailSongListHeaderFilters = ({
     const { playlistId } = useParams() as { playlistId: string };
     const playlistTarget = usePlaylistTarget();
     const { setPlaylistBehavior } = useSettingsStoreActions();
+    const server = useCurrentServer();
     const serverId = useCurrentServerId();
 
     const detailQuery = useQuery(playlistsQueries.detail({ query: { id: playlistId }, serverId }));
@@ -227,17 +230,17 @@ export const PlaylistDetailSongListHeaderFilters = ({
                             optionsConfig: {
                                 autoFitColumns: { hidden: true },
                             },
-                            tableColumnsData: SONG_TABLE_COLUMNS,
+                            tableColumnsData: filterColumnsForServerType(SONG_TABLE_COLUMNS, server?.type),
                             tableKey: 'detail',
                         }}
                         listKey={listKey}
-                        tableColumnsData={ALBUM_TABLE_COLUMNS}
+                        tableColumnsData={filterColumnsForServerType(ALBUM_TABLE_COLUMNS, server?.type)}
                     />
                 ) : (
                     <ListConfigMenu
                         displayTypes={SONG_DISPLAY_TYPES}
                         listKey={listKey}
-                        tableColumnsData={PLAYLIST_SONG_TABLE_COLUMNS}
+                        tableColumnsData={filterColumnsForServerType(PLAYLIST_SONG_TABLE_COLUMNS, server?.type)}
                     />
                 )}
             </Group>

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useMemo } from 'react';
 
+import { filterColumnsForServerType } from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { useListContext } from '/@/renderer/context/list-context';
 import { ListFilters, ListFiltersTitle } from '/@/renderer/features/shared/components/list-filters';
 import { ListWithSidebarContainer } from '/@/renderer/features/shared/components/list-with-sidebar-container';
@@ -105,6 +106,11 @@ export const SongListView = ({
         };
     }, [query, overrideQuery]);
 
+    const filteredColumns = useMemo(
+        () => filterColumnsForServerType(table.columns, server?.type),
+        [table.columns, server?.type],
+    );
+
     switch (display) {
         case ListDisplayType.GRID: {
             switch (pagination) {
@@ -140,7 +146,7 @@ export const SongListView = ({
                     return (
                         <SongListInfiniteTable
                             autoFitColumns={table.autoFitColumns}
-                            columns={table.columns}
+                            columns={filteredColumns}
                             enableAlternateRowColors={table.enableAlternateRowColors}
                             enableHeader={table.enableHeader}
                             enableHorizontalBorders={table.enableHorizontalBorders}
@@ -156,7 +162,7 @@ export const SongListView = ({
                     return (
                         <SongListPaginatedTable
                             autoFitColumns={table.autoFitColumns}
-                            columns={table.columns}
+                            columns={filteredColumns}
                             enableAlternateRowColors={table.enableAlternateRowColors}
                             enableHeader={table.enableHeader}
                             enableHorizontalBorders={table.enableHorizontalBorders}

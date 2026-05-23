@@ -1,7 +1,10 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SONG_TABLE_COLUMNS } from '/@/renderer/components/item-list/item-table-list/default-columns';
+import {
+    filterColumnsForServerType,
+    SONG_TABLE_COLUMNS,
+} from '/@/renderer/components/item-list/item-table-list/default-columns';
 import { useListContext } from '/@/renderer/context/list-context';
 import { useAlbumListFilters } from '/@/renderer/features/albums/hooks/use-album-list-filters';
 import {
@@ -18,7 +21,7 @@ import { ListSortByDropdown } from '/@/renderer/features/shared/components/list-
 import { ListSortOrderToggleButton } from '/@/renderer/features/shared/components/list-sort-order-toggle-button';
 import { FILTER_KEYS } from '/@/renderer/features/shared/utils';
 import { useSongListFilters } from '/@/renderer/features/songs/hooks/use-song-list-filters';
-import { GenreTarget, useGenreTarget, useSettingsStoreActions } from '/@/renderer/store';
+import { GenreTarget, useCurrentServer, useGenreTarget, useSettingsStoreActions } from '/@/renderer/store';
 import { Button } from '/@/shared/components/button/button';
 import { Divider } from '/@/shared/components/divider/divider';
 import { Flex } from '/@/shared/components/flex/flex';
@@ -29,6 +32,7 @@ import { ItemListKey } from '/@/shared/types/types';
 
 export const SongListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarget?: boolean }) => {
     const { t } = useTranslation();
+    const server = useCurrentServer();
     const target = useGenreTarget();
     const { setGenreBehavior } = useSettingsStoreActions();
     const albumFilters = useAlbumListFilters();
@@ -97,7 +101,7 @@ export const SongListHeaderFilters = ({ toggleGenreTarget }: { toggleGenreTarget
                 <ListConfigMenu
                     displayTypes={SONG_DISPLAY_TYPES}
                     listKey={ItemListKey.SONG}
-                    tableColumnsData={SONG_TABLE_COLUMNS}
+                    tableColumnsData={filterColumnsForServerType(SONG_TABLE_COLUMNS, server?.type)}
                 />
             </Group>
         </Flex>

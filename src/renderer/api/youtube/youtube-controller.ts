@@ -150,21 +150,23 @@ const mapTrackToSong = (track: YouTubeTrack, serverId: string): Song => {
         track.thumbnails.default ||
         null;
 
+    const artist = cleanArtistName(track.channel_title);
+
     return {
         _itemType: LibraryItem.SONG,
         _serverId: serverId,
         _serverType: ServerType.YOUTUBE,
         album: null,
-        albumArtistName: track.channel_title,
+        albumArtistName: artist,
         albumArtists: [],
         albumId: '',
-        artistName: track.channel_title,
+        artistName: artist,
         artists: [
             {
-                id: track.channel_title,
+                id: artist,
                 imageId: null,
                 imageUrl: null,
-                name: track.channel_title,
+                name: artist,
                 userFavorite: false,
                 userRating: null,
             },
@@ -229,6 +231,12 @@ const mapPlaylistSummary = (pl: YouTubePlaylistSummary, serverId: string): Playl
         size: null,
         songCount: pl.track_count,
     };
+};
+
+const cleanArtistName = (name: string): string => {
+    const isTopic = name.endsWith(' - Topic');
+    const clean = isTopic ? name.replace(/ - Topic$/, '') : name;
+    return isTopic ? `${clean} ✓` : clean;
 };
 
 const notImplemented = (name: string) => {
@@ -439,21 +447,23 @@ export const YouTubeController: InternalControllerEndpoint = {
             apiClientProps.signal,
         );
 
-        const songs: Song[] = data.items.map((item) => ({
+        const songs: Song[] = data.items.map((item) => {
+            const artist = cleanArtistName(item.channel_title);
+            return {
             _itemType: LibraryItem.SONG,
             _serverId: server.id,
             _serverType: ServerType.YOUTUBE,
             album: null,
-            albumArtistName: item.channel_title,
+            albumArtistName: artist,
             albumArtists: [],
             albumId: '',
-            artistName: item.channel_title,
+            artistName: artist,
             artists: [
                 {
-                    id: item.channel_title,
+                    id: artist,
                     imageId: null,
                     imageUrl: null,
-                    name: item.channel_title,
+                    name: artist,
                     userFavorite: false,
                     userRating: null,
                 },
@@ -495,7 +505,8 @@ export const YouTubeController: InternalControllerEndpoint = {
             updatedAt: '',
             userFavorite: false,
             userRating: null,
-        }));
+        };
+        });
 
         return { albumArtists: [], albums: [], songs };
     },
