@@ -46,6 +46,85 @@ const ytFetch = async (url: string, signal?: AbortSignal): Promise<any> => {
     return res.json();
 };
 
+const MAX_PAGES = 200;
+
+interface PaginatedResponse<T> {
+    items: T[];
+    next_page_token: string | null;
+}
+
+const fetchAllPages = async <T>(
+    baseUrl: string,
+    signal?: AbortSignal,
+): Promise<T[]> => {
+    const allItems: T[] = [];
+    let pageToken: string | null = null;
+    let page = 0;
+
+    do {
+        if (signal?.aborted) {
+            throw new DOMException('The operation was aborted.', 'AbortError');
+        }
+
+        page++;
+        if (page > MAX_PAGES) {
+            throw new Error(
+                `Pagination limit reached (${MAX_PAGES} pages, ${allItems.length} items fetched) for ${baseUrl}`,
+            );
+        }
+
+        const url = pageToken ? `${baseUrl}?pageToken=${pageToken}` : baseUrl;
+        const data: PaginatedResponse<T> = await ytFetch(url, signal);
+
+        if (!data.items) {
+            throw new Error(
+                `Missing items in response (page ${page}, ${allItems.length} items fetched so far) for ${baseUrl}`,
+            );
+        }
+
+        allItems.push(...data.items);
+        pageToken = data.next_page_token;
+    } while (pageToken);
+
+    return allItems;
+};
+
+const fetchUntilFound = async <T>(
+    baseUrl: string,
+    predicate: (item: T) => boolean,
+    signal?: AbortSignal,
+): Promise<T | null> => {
+    let pageToken: string | null = null;
+    let page = 0;
+
+    do {
+        if (signal?.aborted) {
+            throw new DOMException('The operation was aborted.', 'AbortError');
+        }
+
+        page++;
+        if (page > MAX_PAGES) {
+            return null;
+        }
+
+        const url = pageToken ? `${baseUrl}?pageToken=${pageToken}` : baseUrl;
+        const data: PaginatedResponse<T> = await ytFetch(url, signal);
+
+        if (!data.items) {
+            throw new Error(
+                `Missing items in response (page ${page}) for ${baseUrl}`,
+            );
+        }
+
+        const found = data.items.find(predicate);
+        if (found) return found;
+
+        pageToken = data.next_page_token;
+    } while (pageToken);
+
+    return null;
+};
+
 export const fetchMe = async (serverUrl: string): Promise<YouTubeMeResponse> => {
     const res = await fetch(`${serverUrl}/me`, { credentials: 'include' });
 
@@ -193,20 +272,11 @@ export const YouTubeController: InternalControllerEndpoint = {
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        const allPlaylists: YouTubePlaylistSummary[] = [];
-        let pageToken: string | null = null;
-
-        do {
-            const url = pageToken
-                ? `${server.url}/me/playlists?pageToken=${pageToken}`
-                : `${server.url}/me/playlists`;
-            const data: { items: YouTubePlaylistSummary[]; next_page_token: string | null } =
-                await ytFetch(url, apiClientProps.signal);
-            allPlaylists.push(...data.items);
-            pageToken = data.next_page_token;
-        } while (pageToken);
-
-        const found = allPlaylists.find((p) => p.id === query.id);
+        const found = await fetchUntilFound<YouTubePlaylistSummary>(
+            `${server.url}/me/playlists`,
+            (p) => p.id === query.id,
+            apiClientProps.signal,
+        );
         if (!found) throw new Error('Playlist not found');
 
         return mapPlaylistSummary(found, server.id);
@@ -216,19 +286,10 @@ export const YouTubeController: InternalControllerEndpoint = {
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        const allPlaylists: YouTubePlaylistSummary[] = [];
-        let pageToken: string | null = null;
-
-        do {
-            const url = pageToken
-                ? `${server.url}/me/playlists?pageToken=${pageToken}`
-                : `${server.url}/me/playlists`;
-            const data: { items: YouTubePlaylistSummary[]; next_page_token: string | null } =
-                await ytFetch(url, apiClientProps.signal);
-            allPlaylists.push(...data.items);
-            pageToken = data.next_page_token;
-        } while (pageToken);
-
+        const allPlaylists = await fetchAllPages<YouTubePlaylistSummary>(
+            `${server.url}/me/playlists`,
+            apiClientProps.signal,
+        );
         const items = allPlaylists.map((p) => mapPlaylistSummary(p, server.id));
 
         return {
@@ -242,19 +303,27 @@ export const YouTubeController: InternalControllerEndpoint = {
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        const allPlaylists: YouTubePlaylistSummary[] = [];
-        let pageToken: string | null = null;
+        // Fetch only the first page — use total_count from backend if available
+        const data: PaginatedResponse<YouTubePlaylistSummary> & { total_count?: number } =
+            await ytFetch(`${server.url}/me/playlists`, apiClientProps.signal);
 
-        do {
-            const url = pageToken
-                ? `${server.url}/me/playlists?pageToken=${pageToken}`
-                : `${server.url}/me/playlists`;
-            const data: { items: YouTubePlaylistSummary[]; next_page_token: string | null } =
-                await ytFetch(url, apiClientProps.signal);
-            allPlaylists.push(...data.items);
-            pageToken = data.next_page_token;
-        } while (pageToken);
+        if (data.total_count != null) {
+            return data.total_count;
+        }
 
+        // Fallback: paginate to count all items
+        if (!data.items) {
+            return 0;
+        }
+
+        if (!data.next_page_token) {
+            return data.items.length;
+        }
+
+        const allPlaylists = await fetchAllPages<YouTubePlaylistSummary>(
+            `${server.url}/me/playlists`,
+            apiClientProps.signal,
+        );
         return allPlaylists.length;
     },
     getPlaylistSongList: async (args) => {
@@ -262,21 +331,10 @@ export const YouTubeController: InternalControllerEndpoint = {
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        const allTracks: YouTubeTrack[] = [];
-        let pageToken: string | null = null;
-
-        do {
-            const url = pageToken
-                ? `${server.url}/playlists/${query.id}/items?pageToken=${pageToken}`
-                : `${server.url}/playlists/${query.id}/items`;
-            const data: { items: YouTubeTrack[]; next_page_token: string | null } = await ytFetch(
-                url,
-                apiClientProps.signal,
-            );
-            allTracks.push(...data.items);
-            pageToken = data.next_page_token;
-        } while (pageToken);
-
+        const allTracks = await fetchAllPages<YouTubeTrack>(
+            `${server.url}/playlists/${query.id}/items`,
+            apiClientProps.signal,
+        );
         const items = allTracks.map((t) => mapTrackToSong(t, server.id));
 
         return {
@@ -310,21 +368,10 @@ export const YouTubeController: InternalControllerEndpoint = {
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        const allTracks: YouTubeTrack[] = [];
-        let pageToken: string | null = null;
-
-        do {
-            const url = pageToken
-                ? `${server.url}/me/liked-music?pageToken=${pageToken}`
-                : `${server.url}/me/liked-music`;
-            const data: { items: YouTubeTrack[]; next_page_token: string | null } = await ytFetch(
-                url,
-                apiClientProps.signal,
-            );
-            allTracks.push(...data.items);
-            pageToken = data.next_page_token;
-        } while (pageToken);
-
+        const allTracks = await fetchAllPages<YouTubeTrack>(
+            `${server.url}/me/liked-music`,
+            apiClientProps.signal,
+        );
         const items = allTracks.map((t) => mapTrackToSong(t, server.id));
 
         return {
