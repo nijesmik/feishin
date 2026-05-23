@@ -14,6 +14,7 @@ import { WebAudioContext } from '/@/renderer/features/player/context/webaudio-co
 import { useCheckForUpdates } from '/@/renderer/hooks/use-check-for-updates';
 import { useNativeMenuSync } from '/@/renderer/hooks/use-native-menu-sync';
 import { useSyncSettingsToMain } from '/@/renderer/hooks/use-sync-settings-to-main';
+import { useYouTubeOAuthCallback } from '/@/renderer/hooks/use-youtube-oauth-callback';
 import { AppRouter } from '/@/renderer/router/app-router';
 import { useCssSettings, useHotkeySettings, useLanguage } from '/@/renderer/store';
 import { useAppTheme } from '/@/renderer/themes/use-app-theme';
@@ -23,6 +24,7 @@ import '/@/shared/styles/global.css';
 import { PlayerProvider } from '/@/renderer/features/player/context/player-context';
 import { AudioPlayers } from '/@/renderer/features/player/components/audio-players';
 import { ReleaseNotesModal } from '/@/renderer/release-notes-modal';
+import { Agentation } from 'agentation';
 
 const UpdateAvailableDialog = lazy(() =>
     import('./update-available-dialog').then((module) => ({
@@ -81,9 +83,15 @@ const AppShell = memo(function AppShell() {
             <Suspense fallback={null}>
                 <UpdateAvailableDialog />
             </Suspense>
+            {import.meta.env.DEV && <Agentation />}
         </>
     );
 });
+
+const YouTubeOAuthEffect = () => {
+    useYouTubeOAuthCallback();
+    return null;
+};
 
 const AppEffects = () => (
     <>
@@ -93,6 +101,7 @@ const AppEffects = () => (
         <GlobalShortcutsEffect />
         <LanguageEffect />
         <NativeMenuSyncEffect />
+        <YouTubeOAuthEffect />
     </>
 );
 

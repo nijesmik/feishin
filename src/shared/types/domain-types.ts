@@ -37,6 +37,7 @@ export enum ServerType {
     JELLYFIN = 'jellyfin',
     NAVIDROME = 'navidrome',
     SUBSONIC = 'subsonic',
+    YOUTUBE = 'youtube',
 }
 
 export enum SortOrder {
@@ -119,6 +120,7 @@ type SortOrderMap = {
     jellyfin: Record<SortOrder, JFSortOrder>;
     navidrome: Record<SortOrder, NDSortOrder>;
     subsonic: Record<SortOrder, undefined>;
+    youtube: Record<SortOrder, undefined>;
 };
 
 export const sortOrderMap: SortOrderMap = {
@@ -131,6 +133,10 @@ export const sortOrderMap: SortOrderMap = {
         DESC: NDSortOrder.DESC,
     },
     subsonic: {
+        ASC: undefined,
+        DESC: undefined,
+    },
+    youtube: {
         ASC: undefined,
         DESC: undefined,
     },
@@ -433,6 +439,7 @@ type GenreListSortMap = {
     jellyfin: Record<GenreListSort, JFGenreListSort | undefined>;
     navidrome: Record<GenreListSort, NDGenreListSort | undefined>;
     subsonic: Record<UserListSort, undefined>;
+    youtube: Record<GenreListSort, undefined>;
 };
 
 export const genreListSortMap: GenreListSortMap = {
@@ -445,12 +452,16 @@ export const genreListSortMap: GenreListSortMap = {
     subsonic: {
         name: undefined,
     },
+    youtube: {
+        name: undefined,
+    },
 };
 
 type TagListSortMap = {
     jellyfin: Record<TagListSort, undefined>;
     navidrome: Record<TagListSort, NDTagListSort | undefined>;
     subsonic: Record<TagListSort, undefined>;
+    youtube: Record<TagListSort, undefined>;
 };
 
 export const tagListSortMap: TagListSortMap = {
@@ -461,6 +472,9 @@ export const tagListSortMap: TagListSortMap = {
         name: NDTagListSort.TAG_VALUE,
     },
     subsonic: {
+        name: undefined,
+    },
+    youtube: {
         name: undefined,
     },
 };
@@ -518,6 +532,7 @@ type AlbumListSortMap = {
     jellyfin: Record<AlbumListSort, JFAlbumListSort | undefined>;
     navidrome: Record<AlbumListSort, NDAlbumListSort | undefined>;
     subsonic: Record<AlbumListSort, undefined>;
+    youtube: Record<AlbumListSort, undefined>;
 };
 
 export const albumListSortMap: AlbumListSortMap = {
@@ -563,6 +578,26 @@ export const albumListSortMap: AlbumListSortMap = {
         year: NDAlbumListSort.YEAR,
     },
     subsonic: {
+        albumArtist: undefined,
+        artist: undefined,
+        communityRating: undefined,
+        criticRating: undefined,
+        duration: undefined,
+        explicitStatus: undefined,
+        favorited: undefined,
+        id: undefined,
+        name: undefined,
+        playCount: undefined,
+        random: undefined,
+        rating: undefined,
+        recentlyAdded: undefined,
+        recentlyPlayed: undefined,
+        releaseDate: undefined,
+        songCount: undefined,
+        sortName: undefined,
+        year: undefined,
+    },
+    youtube: {
         albumArtist: undefined,
         artist: undefined,
         communityRating: undefined,
@@ -647,6 +682,7 @@ type SongListSortMap = {
     jellyfin: Record<SongListSort, JFSongListSort | undefined>;
     navidrome: Record<SongListSort, NDSongListSort | undefined>;
     subsonic: Record<SongListSort, undefined>;
+    youtube: Record<SongListSort, undefined>;
 };
 
 export const songListSortMap: SongListSortMap = {
@@ -716,6 +752,28 @@ export const songListSortMap: SongListSortMap = {
         sortName: undefined,
         year: undefined,
     },
+    youtube: {
+        album: undefined,
+        albumArtist: undefined,
+        artist: undefined,
+        bpm: undefined,
+        channels: undefined,
+        comment: undefined,
+        duration: undefined,
+        explicitStatus: undefined,
+        favorited: undefined,
+        genre: undefined,
+        id: undefined,
+        name: undefined,
+        playCount: undefined,
+        random: undefined,
+        rating: undefined,
+        recentlyAdded: undefined,
+        recentlyPlayed: undefined,
+        releaseDate: undefined,
+        sortName: undefined,
+        year: undefined,
+    },
 };
 
 export enum AlbumArtistListSort {
@@ -761,6 +819,7 @@ type AlbumArtistListSortMap = {
     jellyfin: Record<AlbumArtistListSort, JFAlbumArtistListSort | undefined>;
     navidrome: Record<AlbumArtistListSort, NDAlbumArtistListSort | undefined>;
     subsonic: Record<AlbumArtistListSort, undefined>;
+    youtube: Record<AlbumArtistListSort, undefined>;
 };
 
 export const albumArtistListSortMap: AlbumArtistListSortMap = {
@@ -791,6 +850,19 @@ export const albumArtistListSortMap: AlbumArtistListSortMap = {
         songCount: NDAlbumArtistListSort.SONG_COUNT,
     },
     subsonic: {
+        album: undefined,
+        albumCount: undefined,
+        duration: undefined,
+        favorited: undefined,
+        name: undefined,
+        playCount: undefined,
+        random: undefined,
+        rating: undefined,
+        recentlyAdded: undefined,
+        releaseDate: undefined,
+        songCount: undefined,
+    },
+    youtube: {
         album: undefined,
         albumCount: undefined,
         duration: undefined,
@@ -858,6 +930,7 @@ type ArtistListSortMap = {
     jellyfin: Record<ArtistListSort, JFArtistListSort | undefined>;
     navidrome: Record<ArtistListSort, undefined>;
     subsonic: Record<ArtistListSort, undefined>;
+    youtube: Record<ArtistListSort, undefined>;
 };
 
 export const artistListSortMap: ArtistListSortMap = {
@@ -888,6 +961,19 @@ export const artistListSortMap: ArtistListSortMap = {
         songCount: undefined,
     },
     subsonic: {
+        album: undefined,
+        albumCount: undefined,
+        duration: undefined,
+        favorited: undefined,
+        name: undefined,
+        playCount: undefined,
+        random: undefined,
+        rating: undefined,
+        recentlyAdded: undefined,
+        releaseDate: undefined,
+        songCount: undefined,
+    },
+    youtube: {
         album: undefined,
         albumCount: undefined,
         duration: undefined,
@@ -1193,6 +1279,7 @@ type PlaylistListSortMap = {
     jellyfin: Record<PlaylistListSort, JFPlaylistListSort | undefined>;
     navidrome: Record<PlaylistListSort, NDPlaylistListSort | undefined>;
     subsonic: Record<PlaylistListSort, undefined>;
+    youtube: Record<PlaylistListSort, undefined>;
 };
 
 export const playlistListSortMap: PlaylistListSortMap = {
@@ -1213,6 +1300,14 @@ export const playlistListSortMap: PlaylistListSortMap = {
         updatedAt: NDPlaylistListSort.UPDATED_AT,
     },
     subsonic: {
+        duration: undefined,
+        name: undefined,
+        owner: undefined,
+        public: undefined,
+        songCount: undefined,
+        updatedAt: undefined,
+    },
+    youtube: {
         duration: undefined,
         name: undefined,
         owner: undefined,
@@ -1277,6 +1372,7 @@ type UserListSortMap = {
     jellyfin: Record<UserListSort, undefined>;
     navidrome: Record<UserListSort, NDUserListSort | undefined>;
     subsonic: Record<UserListSort, undefined>;
+    youtube: Record<UserListSort, undefined>;
 };
 
 export const userListSortMap: UserListSortMap = {
@@ -1287,6 +1383,9 @@ export const userListSortMap: UserListSortMap = {
         name: NDUserListSort.NAME,
     },
     subsonic: {
+        name: undefined,
+    },
+    youtube: {
         name: undefined,
     },
 };
