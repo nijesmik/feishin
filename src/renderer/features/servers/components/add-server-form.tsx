@@ -137,6 +137,12 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
     };
 
     const handleGoogleLogin = () => {
+        if (serverLock && Object.keys(serverList).length >= 1) {
+            toast.error({
+                message: t('error.serverLockSingleServer'),
+            });
+            return;
+        }
         const serverUrl = form.values.url.replace(/\/$/, '');
         setYouTubeOAuthPending(serverUrl, form.values.name);
         window.location.href = `${serverUrl}/auth/google/login`;
@@ -363,7 +369,7 @@ export const AddServerForm = ({ onCancel }: AddServerFormProps) => {
                         )}
                         {isYouTube ? (
                             <Button
-                                disabled={!form.values.url}
+                                disabled={!form.values.url || !form.values.name}
                                 onClick={handleGoogleLogin}
                                 variant="filled"
                             >

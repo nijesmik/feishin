@@ -5,6 +5,8 @@ import { fetchMe } from '/@/renderer/api/youtube/youtube-controller';
 import { useAuthStoreActions } from '/@/renderer/store';
 import { ServerListItemWithCredential } from '/@/shared/types/domain-types';
 import { ServerType } from '/@/shared/types/types';
+import { toast } from '/@/renderer/components/toast';
+import { closeAllModals } from '@mantine/modals';
 
 const YOUTUBE_PENDING_KEY = 'youtube_oauth_pending';
 
@@ -45,9 +47,11 @@ export const useYouTubeOAuthCallback = () => {
 
                 addServer(serverItem);
                 setCurrentServer(serverItem);
+                closeAllModals();
+                toast.success({ message: `Connected to ${serverName}` });
             })
             .catch(() => {
-                // OAuth not completed or cookie not set — ignore
+                toast.error({ message: 'Google login failed — please try again' });
             });
     }, [addServer, setCurrentServer]);
 };

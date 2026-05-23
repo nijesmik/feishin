@@ -160,10 +160,13 @@ const getYouTubeImageRequest = ({
 }: ReplaceApiClientProps<ImageArgs>): ImageRequest | null => {
     if (!server) return null;
 
+    const imageUrl = query.id || null;
+    if (!imageUrl) return null;
+
     return {
         cacheKey: ['youtube', server.id, query.id, query.size || ''].join(':'),
-        credentials: 'include' as RequestCredentials,
-        url: `${server.url}/me`,
+        credentials: undefined,
+        url: imageUrl,
     };
 };
 
@@ -203,6 +206,7 @@ export const YouTubeController: InternalControllerEndpoint = {
     },
     getInternetRadioStations: async () => [],
     getMusicFolderList: async () => ({ items: [], startIndex: 0, totalRecordCount: 0 }),
+    // Backend has no single-playlist endpoint — fetch all and filter client-side
     getPlaylistDetail: async (args) => {
         const { apiClientProps, query } = args;
         const server = apiClientProps.server;
