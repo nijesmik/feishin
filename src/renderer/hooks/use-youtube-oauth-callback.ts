@@ -30,7 +30,13 @@ export const useYouTubeOAuthCallback = () => {
 
         sessionStorage.removeItem(YOUTUBE_PENDING_KEY);
 
-        const { serverUrl, serverName } = JSON.parse(pending);
+        let serverUrl: string;
+        let serverName: string;
+        try {
+            ({ serverUrl, serverName } = JSON.parse(pending));
+        } catch {
+            return;
+        }
 
         fetchMe(serverUrl)
             .then((me) => {

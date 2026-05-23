@@ -6,4 +6,5 @@ out
 .DS_Store
 .eslintcache
 *.log*
+*.tsbuildinfo
 release
