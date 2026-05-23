@@ -455,6 +455,13 @@ const ALBUM_LIST_FILTERS: Partial<
             value: AlbumListSort.YEAR,
         },
     ],
+    [ServerType.YOUTUBE]: [
+        {
+            defaultOrder: SortOrder.ASC,
+            name: i18n.t('filter.name'),
+            value: AlbumListSort.NAME,
+        },
+    ],
 };
 
 const SONG_LIST_FILTERS: Partial<
@@ -601,6 +608,13 @@ const SONG_LIST_FILTERS: Partial<
             value: SongListSort.NAME,
         },
     ],
+    [ServerType.YOUTUBE]: [
+        {
+            defaultOrder: SortOrder.ASC,
+            name: i18n.t('filter.name'),
+            value: SongListSort.NAME,
+        },
+    ],
 };
 
 const FOLDER_LIST_FILTERS: Partial<
@@ -630,6 +644,13 @@ const FOLDER_LIST_FILTERS: Partial<
         },
         ...(SONG_LIST_FILTERS[ServerType.SUBSONIC] || []),
     ],
+    [ServerType.YOUTUBE]: [
+        {
+            defaultOrder: SortOrder.ASC,
+            name: i18n.t('filter.name'),
+            value: SongListSort.NAME,
+        },
+    ],
 };
 
 const PLAYLIST_SONG_LIST_FILTERS: Partial<
@@ -638,6 +659,7 @@ const PLAYLIST_SONG_LIST_FILTERS: Partial<
     [ServerType.JELLYFIN]: CLIENT_SIDE_SONG_FILTERS,
     [ServerType.NAVIDROME]: CLIENT_SIDE_SONG_FILTERS,
     [ServerType.SUBSONIC]: CLIENT_SIDE_SONG_FILTERS,
+    [ServerType.YOUTUBE]: CLIENT_SIDE_SONG_FILTERS,
 };
 
 const ALBUM_ARTIST_LIST_FILTERS: Partial<
@@ -722,6 +744,13 @@ const ALBUM_ARTIST_LIST_FILTERS: Partial<
             defaultOrder: SortOrder.DESC,
             name: i18n.t('filter.rating'),
             value: AlbumArtistListSort.RATING,
+        },
+    ],
+    [ServerType.YOUTUBE]: [
+        {
+            defaultOrder: SortOrder.ASC,
+            name: i18n.t('filter.name'),
+            value: AlbumArtistListSort.NAME,
         },
     ],
 };
@@ -810,6 +839,13 @@ const ARTIST_LIST_FILTERS: Partial<
             value: ArtistListSort.RATING,
         },
     ],
+    [ServerType.YOUTUBE]: [
+        {
+            defaultOrder: SortOrder.ASC,
+            name: i18n.t('filter.name'),
+            value: ArtistListSort.NAME,
+        },
+    ],
 };
 
 const GENRE_LIST_FILTERS: Partial<
@@ -830,6 +866,13 @@ const GENRE_LIST_FILTERS: Partial<
         },
     ],
     [ServerType.SUBSONIC]: [
+        {
+            defaultOrder: SortOrder.ASC,
+            name: i18n.t('filter.name'),
+            value: GenreListSort.NAME,
+        },
+    ],
+    [ServerType.YOUTUBE]: [
         {
             defaultOrder: SortOrder.ASC,
             name: i18n.t('filter.name'),
@@ -897,6 +940,13 @@ const PLAYLIST_LIST_FILTERS: Partial<
             value: PlaylistListSort.NAME,
         },
     ],
+    [ServerType.YOUTUBE]: [
+        {
+            defaultOrder: SortOrder.ASC,
+            name: i18n.t('filter.name'),
+            value: PlaylistListSort.NAME,
+        },
+    ],
 };
 
 const RADIO_LIST_FILTERS: Partial<
@@ -938,6 +988,7 @@ const RADIO_LIST_FILTERS: Partial<
             value: RadioListSort.NAME,
         },
     ],
+    [ServerType.YOUTUBE]: [],
 };
 
 const FILTERS: Partial<Record<LibraryItem, any>> = {
