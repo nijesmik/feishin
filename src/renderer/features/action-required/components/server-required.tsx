@@ -7,7 +7,7 @@ import { isServerLock } from '/@/renderer/features/action-required/utils/window-
 import JellyfinLogo from '/@/renderer/features/servers/assets/jellyfin.png';
 import NavidromeLogo from '/@/renderer/features/servers/assets/navidrome.png';
 import OpenSubsonicLogo from '/@/renderer/features/servers/assets/opensubsonic.png';
-import { AddServerForm } from '/@/renderer/features/servers/components/add-server-form';
+import { GoogleLoginForm } from '/@/renderer/features/servers/components/google-login-form';
 import { EditServerForm } from '/@/renderer/features/servers/components/edit-server-form';
 import { AppRoute } from '/@/renderer/router/routes';
 import { useAuthStoreActions, useCurrentServer, useServerList } from '/@/renderer/store';
@@ -37,7 +37,7 @@ export const ServerRequired = () => {
                     {!isServerLock() && (
                         <>
                             <Divider my="lg" />
-                            <AddServerForm onCancel={null} />
+                            <GoogleLoginForm onCancel={null} />
                         </>
                     )}
                 </Stack>
@@ -45,7 +45,7 @@ export const ServerRequired = () => {
         );
     }
 
-    return <AddServerForm onCancel={null} />;
+    return <GoogleLoginForm onCancel={null} />;
 };
 
 function ServerSelector() {

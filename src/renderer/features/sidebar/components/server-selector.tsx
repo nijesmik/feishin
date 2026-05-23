@@ -6,7 +6,6 @@ import styles from './server-selector.module.css';
 import JellyfinLogo from '/@/renderer/features/servers/assets/jellyfin.png';
 import NavidromeLogo from '/@/renderer/features/servers/assets/navidrome.png';
 import OpenSubsonicLogo from '/@/renderer/features/servers/assets/opensubsonic.png';
-import YouTubeLogo from '/@/renderer/features/servers/assets/youtube.svg';
 import { sharedQueries } from '/@/renderer/features/shared/api/shared-api';
 import { ServerSelectorItems } from '/@/renderer/features/sidebar/components/server-selector-items';
 import { useCurrentServer } from '/@/renderer/store';
@@ -60,9 +59,7 @@ export const ServerSelector = () => {
             ? NavidromeLogo
             : currentServer.type === ServerType.JELLYFIN
               ? JellyfinLogo
-              : currentServer.type === ServerType.YOUTUBE
-                ? YouTubeLogo
-                : OpenSubsonicLogo;
+              : OpenSubsonicLogo;
 
     return (
         <DropdownMenu offset={0} position="right-start" withinPortal={false}>

@@ -6,7 +6,7 @@ import { isServerLock } from '/@/renderer/features/action-required/utils/window-
 import JellyfinLogo from '/@/renderer/features/servers/assets/jellyfin.png';
 import NavidromeLogo from '/@/renderer/features/servers/assets/navidrome.png';
 import OpenSubsonicLogo from '/@/renderer/features/servers/assets/opensubsonic.png';
-import { AddServerForm } from '/@/renderer/features/servers/components/add-server-form';
+import { GoogleLoginForm } from '/@/renderer/features/servers/components/google-login-form';
 import { IgnoreCorsSslSwitches } from '/@/renderer/features/servers/components/ignore-cors-ssl-switches';
 import { ServerListItem } from '/@/renderer/features/servers/components/server-list-item';
 import { useCurrentServer, useServerList } from '/@/renderer/store';
@@ -30,7 +30,7 @@ export const ServerList = () => {
         openContextModal({
             innerProps: {
                 modalBody: (vars: ContextModalVars) => (
-                    <AddServerForm onCancel={() => vars.context.closeModal(vars.id)} />
+                    <GoogleLoginForm onCancel={() => vars.context.closeModal(vars.id)} />
                 ),
             },
             modal: 'base',
