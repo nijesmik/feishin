@@ -53,6 +53,11 @@ interface PaginatedResponse<T> {
     next_page_token: string | null;
 }
 
+const paginatedUrl = (baseUrl: string, pageToken: string): string => {
+    const separator = baseUrl.includes('?') ? '&' : '?';
+    return `${baseUrl}${separator}pageToken=${pageToken}`;
+};
+
 const fetchAllPages = async <T>(
     baseUrl: string,
     signal?: AbortSignal,
@@ -73,7 +78,7 @@ const fetchAllPages = async <T>(
             );
         }
 
-        const url = pageToken ? `${baseUrl}?pageToken=${pageToken}` : baseUrl;
+        const url = pageToken ? paginatedUrl(baseUrl, pageToken) : baseUrl;
         const data: PaginatedResponse<T> = await ytFetch(url, signal);
 
         if (!data.items) {
@@ -104,10 +109,12 @@ const fetchUntilFound = async <T>(
 
         page++;
         if (page > MAX_PAGES) {
-            return null;
+            throw new Error(
+                `Pagination limit reached (${MAX_PAGES} pages) while searching for ${baseUrl}`,
+            );
         }
 
-        const url = pageToken ? `${baseUrl}?pageToken=${pageToken}` : baseUrl;
+        const url = pageToken ? paginatedUrl(baseUrl, pageToken) : baseUrl;
         const data: PaginatedResponse<T> = await ytFetch(url, signal);
 
         if (!data.items) {
@@ -303,28 +310,42 @@ export const YouTubeController: InternalControllerEndpoint = {
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        // Fetch only the first page — use total_count from backend if available
-        const data: PaginatedResponse<YouTubePlaylistSummary> & { total_count?: number } =
-            await ytFetch(`${server.url}/me/playlists`, apiClientProps.signal);
+        const baseUrl = `${server.url}/me/playlists`;
+        const signal = apiClientProps.signal;
+        let count = 0;
+        let pageToken: string | null = null;
+        let page = 0;
 
-        if (data.total_count != null) {
-            return data.total_count;
-        }
+        do {
+            if (signal?.aborted) {
+                throw new DOMException('The operation was aborted.', 'AbortError');
+            }
 
-        // Fallback: paginate to count all items
-        if (!data.items) {
-            return 0;
-        }
+            page++;
+            if (page > MAX_PAGES) {
+                throw new Error(
+                    `Pagination limit reached (${MAX_PAGES} pages, ${count} items counted) for ${baseUrl}`,
+                );
+            }
 
-        if (!data.next_page_token) {
-            return data.items.length;
-        }
+            const url = pageToken ? paginatedUrl(baseUrl, pageToken) : baseUrl;
+            const data: PaginatedResponse<YouTubePlaylistSummary> & { total_count?: number } =
+                await ytFetch(url, signal);
 
-        const allPlaylists = await fetchAllPages<YouTubePlaylistSummary>(
-            `${server.url}/me/playlists`,
-            apiClientProps.signal,
-        );
-        return allPlaylists.length;
+            // Use total_count from backend if available (avoids remaining pages)
+            if (page === 1 && data.total_count != null) {
+                return data.total_count;
+            }
+
+            if (!data.items) {
+                break;
+            }
+
+            count += data.items.length;
+            pageToken = data.next_page_token;
+        } while (pageToken);
+
+        return count;
     },
     getPlaylistSongList: async (args) => {
         const { apiClientProps, query } = args;
