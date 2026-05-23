@@ -2,9 +2,9 @@ import { nanoid } from 'nanoid/non-secure';
 import { useEffect, useRef } from 'react';
 
 import { fetchMe } from '/@/renderer/api/youtube/youtube-controller';
-import { useAuthStoreActions } from '/@/renderer/store';
+import { useAuthStore, useAuthStoreActions } from '/@/renderer/store';
 import { ServerListItemWithCredential } from '/@/shared/types/domain-types';
-import { ServerType } from '/@/shared/types/types';
+import { ServerType } from '/@/shared/types/domain-types';
 import { toast } from '/@/shared/components/toast/toast';
 import { closeAllModals } from '@mantine/modals';
 
@@ -40,9 +40,14 @@ export const useYouTubeOAuthCallback = () => {
 
         fetchMe(serverUrl)
             .then((me) => {
+                const serverList = useAuthStore.getState().serverList;
+                const existing = Object.values(serverList).find(
+                    (s) => s.url === serverUrl,
+                );
+
                 const serverItem: ServerListItemWithCredential = {
                     credential: 'cookie',
-                    id: nanoid(),
+                    id: existing?.id ?? nanoid(),
                     isAdmin: me.is_admin,
                     name: serverName,
                     type: ServerType.YOUTUBE,
@@ -56,8 +61,16 @@ export const useYouTubeOAuthCallback = () => {
                 closeAllModals();
                 toast.success({ message: `Connected to ${serverName}` });
             })
-            .catch(() => {
-                toast.error({ message: 'Google login failed — please try again' });
+            .catch((error: unknown) => {
+                console.error('YouTube OAuth callback failed:', error);
+
+                const isNetworkError =
+                    error instanceof TypeError && error.message === 'Failed to fetch';
+                const message = isNetworkError
+                    ? 'Cannot reach server — check your connection'
+                    : 'Google login failed — please try again';
+
+                toast.error({ message });
             });
     }, [addServer, setCurrentServer]);
 };
