@@ -1,10 +1,7 @@
 import {
-    ImageArgs,
-    ImageRequest,
     InternalControllerEndpoint,
     LibraryItem,
     Playlist,
-    ReplaceApiClientProps,
     ServerType,
     Song,
 } from '/@/shared/types/domain-types';
@@ -154,22 +151,6 @@ const notImplemented = (name: string) => {
     };
 };
 
-const getYouTubeImageRequest = ({
-    apiClientProps: { server },
-    query,
-}: ReplaceApiClientProps<ImageArgs>): ImageRequest | null => {
-    if (!server) return null;
-
-    const imageUrl = query.id || null;
-    if (!imageUrl) return null;
-
-    return {
-        cacheKey: ['youtube', server.id, query.id, query.size || ''].join(':'),
-        credentials: undefined,
-        url: imageUrl,
-    };
-};
-
 export const YouTubeController: InternalControllerEndpoint = {
     addToPlaylist: notImplemented('addToPlaylist') as any,
     authenticate: async (url, _body) => {
@@ -200,7 +181,7 @@ export const YouTubeController: InternalControllerEndpoint = {
     getDownloadUrl: () => '',
     getFolder: notImplemented('getFolder') as any,
     getGenreList: async () => ({ items: [], startIndex: 0, totalRecordCount: 0 }),
-    getImageRequest: getYouTubeImageRequest,
+    getImageRequest: () => null,
     getImageUrl: ({ query }) => {
         return query.id || null;
     },
