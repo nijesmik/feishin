@@ -272,9 +272,7 @@ export const LeftControls = () => {
                                         size: 'md',
                                     }}
                                 />
-                                {artists?.[0]?.id && (
-                                    <VerifiedArtistBadge artistId={artists[0].id} />
-                                )}
+                                <VerifiedArtistBadge artistId={artists?.[0]?.id} />
                             </div>
                             <div
                                 className={clsx(

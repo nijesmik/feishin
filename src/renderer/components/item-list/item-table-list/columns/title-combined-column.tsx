@@ -336,9 +336,7 @@ export const QueueSongTitleCombinedColumn = (props: ItemTableListInnerColumn) =>
                             linkProps={{ fw: 400, isMuted: true }}
                             rootTextProps={{ fw: 400, isMuted: true, size: 'sm' }}
                         />
-                        {item.artists?.[0]?.id && (
-                            <VerifiedArtistBadge artistId={item.artists[0].id} />
-                        )}
+                        <VerifiedArtistBadge artistId={item.artists?.[0]?.id} />
                     </div>
                 </div>
             </TableColumnContainer>
