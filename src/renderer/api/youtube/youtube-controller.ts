@@ -261,11 +261,106 @@ export const YouTubeController: InternalControllerEndpoint = {
     deleteFavorite: notImplemented('deleteFavorite') as any,
     deleteInternetRadioStation: notImplemented('deleteInternetRadioStation') as any,
     deletePlaylist: notImplemented('deletePlaylist') as any,
-    getAlbumArtistDetail: async () => null,
+    getAlbumArtistDetail: async (args) => {
+        const { apiClientProps, query } = args;
+        const server = apiClientProps.server;
+        if (!server) throw new Error('No server');
+
+        try {
+            const data = await ytFetch(
+                `${server.url}/artists/${encodeURIComponent(query.id)}`,
+                apiClientProps.signal,
+            );
+
+            return {
+                _itemType: LibraryItem.ALBUM_ARTIST,
+                _serverId: server.id,
+                _serverType: ServerType.YOUTUBE,
+                albumCount: data.albums?.length ?? 0,
+                biography: data.description ?? null,
+                duration: null,
+                genres: [],
+                id: data.id,
+                imageId: data.image_url ?? null,
+                imageUrl: null,
+                lastPlayedAt: null,
+                mbz: null,
+                name: data.name,
+                playCount: null,
+                similarArtists: null,
+                songCount: null,
+                userFavorite: false,
+                userRating: null,
+            };
+        } catch {
+            return null;
+        }
+    },
     getAlbumArtistList: async () => ({ items: [], startIndex: 0, totalRecordCount: 0 }),
     getAlbumArtistListCount: async () => 0,
     getAlbumDetail: notImplemented('getAlbumDetail') as any,
-    getAlbumList: async () => ({ items: [], startIndex: 0, totalRecordCount: 0 }),
+    getAlbumList: async (args) => {
+        const { apiClientProps, query } = args;
+        const server = apiClientProps.server;
+        if (!server) throw new Error('No server');
+
+        const artistId = query.artistIds?.[0];
+        if (!artistId) return { items: [], startIndex: 0, totalRecordCount: 0 };
+
+        try {
+            const data = await ytFetch(
+                `${server.url}/artists/${encodeURIComponent(artistId)}`,
+                apiClientProps.signal,
+            );
+
+            const items = (data.albums || []).map((album: any) => ({
+                _itemType: LibraryItem.ALBUM,
+                _serverId: server.id,
+                _serverType: ServerType.YOUTUBE,
+                albumArtistName: data.name,
+                albumArtists: [],
+                artists: [],
+                comment: null,
+                createdAt: '',
+                duration: null,
+                explicitStatus: null,
+                genres: [],
+                id: album.id,
+                imageId: album.cover_url ?? null,
+                imageUrl: null,
+                isCompilation: null,
+                lastPlayedAt: null,
+                mbzId: null,
+                mbzReleaseGroupId: null,
+                name: album.name,
+                originalDate: null,
+                originalYear: album.year ?? 0,
+                participants: null,
+                playCount: null,
+                recordLabels: [],
+                releaseDate: null,
+                releaseType: null,
+                releaseTypes: [],
+                releaseYear: album.year ?? null,
+                size: null,
+                songCount: null,
+                sortName: album.name,
+                tags: null,
+                updatedAt: '',
+                userFavorite: false,
+                userRating: null,
+                version: null,
+            }));
+
+            return {
+                items,
+                startIndex: 0,
+                totalRecordCount: items.length,
+            };
+        } catch {
+            return { items: [], startIndex: 0, totalRecordCount: 0 };
+        }
+    },
     getAlbumListCount: async () => 0,
     getAlbumRadio: async () => [],
     getArtistList: async () => ({ items: [], startIndex: 0, totalRecordCount: 0 }),
