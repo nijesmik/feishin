@@ -237,10 +237,11 @@ export const LeftControls = () => {
                                                 e.preventDefault();
                                                 e.stopPropagation();
                                                 if (currentSong) {
+                                                    const hasCtx = currentSong.playlistItemId && currentSong.playlistId;
                                                     ContextMenuController.call({
                                                         cmd: {
                                                             items: [currentSong],
-                                                            type: LibraryItem.SONG,
+                                                            type: hasCtx ? LibraryItem.PLAYLIST_SONG : LibraryItem.SONG,
                                                         },
                                                         event: e,
                                                     });
