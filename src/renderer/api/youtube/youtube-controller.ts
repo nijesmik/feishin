@@ -238,17 +238,19 @@ const cleanArtistName = (name: string): string => {
     return name.replace(/ - Topic$/, '');
 };
 
-const artistCache = new Map<string, { data: any; expires: number }>();
+const artistCache = new Map<string, { promise: Promise<any>; expires: number }>();
 const ARTIST_CACHE_TTL = 60_000;
 
 const fetchArtistCached = async (serverUrl: string, artistId: string, signal?: AbortSignal) => {
     const key = `${serverUrl}:${artistId}`;
     const cached = artistCache.get(key);
-    if (cached && cached.expires > Date.now()) return cached.data;
+    if (cached && cached.expires > Date.now()) return cached.promise;
+    if (cached) artistCache.delete(key);
 
-    const data = await ytFetch(`${serverUrl}/artists/${encodeURIComponent(artistId)}`, signal);
-    artistCache.set(key, { data, expires: Date.now() + ARTIST_CACHE_TTL });
-    return data;
+    const promise = ytFetch(`${serverUrl}/artists/${encodeURIComponent(artistId)}`, signal);
+    artistCache.set(key, { promise, expires: Date.now() + ARTIST_CACHE_TTL });
+    promise.catch(() => artistCache.delete(key));
+    return promise;
 };
 
 const notImplemented = (name: string) => {
