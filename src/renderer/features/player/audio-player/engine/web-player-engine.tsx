@@ -190,10 +190,12 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
                 meta: { error },
             });
 
-            // Unavailable source — skip immediately
+            // Unavailable source — skip only if playing
             if (error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
                 pauseBothPlayers();
-                onEnded();
+                if (playerStatus === PlayerStatus.PLAYING) {
+                    onEnded();
+                }
                 return;
             }
 
