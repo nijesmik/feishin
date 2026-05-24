@@ -22,6 +22,7 @@ interface YouTubeTrack {
     duration_sec: number;
     published_at: string;
     thumbnails: Record<string, string | null>;
+    album_name: string | null;
 }
 
 interface YouTubePlaylistSummary {
@@ -156,7 +157,7 @@ const mapTrackToSong = (track: YouTubeTrack, serverId: string): Song => {
         _itemType: LibraryItem.SONG,
         _serverId: serverId,
         _serverType: ServerType.YOUTUBE,
-        album: null,
+        album: track.album_name ?? null,
         albumArtistName: artist,
         albumArtists: [],
         albumId: '',

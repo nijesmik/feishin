@@ -190,9 +190,14 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
                 meta: { error },
             });
 
-            const isNetworkError =
-                error?.code === MediaError.MEDIA_ERR_NETWORK ||
-                error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED;
+            // Unavailable source — skip immediately
+            if (error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+                pauseBothPlayers();
+                onEnded();
+                return;
+            }
+
+            const isNetworkError = error?.code === MediaError.MEDIA_ERR_NETWORK;
 
             if (isNetworkError) {
                 if (networkRetryCountRef.current < MAX_NETWORK_RETRIES) {
