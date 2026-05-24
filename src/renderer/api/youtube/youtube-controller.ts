@@ -238,6 +238,19 @@ const cleanArtistName = (name: string): string => {
     return name.replace(/ - Topic$/, '');
 };
 
+const artistCache = new Map<string, { data: any; expires: number }>();
+const ARTIST_CACHE_TTL = 60_000;
+
+const fetchArtistCached = async (serverUrl: string, artistId: string, signal?: AbortSignal) => {
+    const key = `${serverUrl}:${artistId}`;
+    const cached = artistCache.get(key);
+    if (cached && cached.expires > Date.now()) return cached.data;
+
+    const data = await ytFetch(`${serverUrl}/artists/${encodeURIComponent(artistId)}`, signal);
+    artistCache.set(key, { data, expires: Date.now() + ARTIST_CACHE_TTL });
+    return data;
+};
+
 const notImplemented = (name: string) => {
     return () => {
         throw new Error(`${name} is not implemented for YouTube`);
@@ -266,16 +279,13 @@ export const YouTubeController: InternalControllerEndpoint = {
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        const data = await ytFetch(
-            `${server.url}/artists/${encodeURIComponent(query.id)}`,
-            apiClientProps.signal,
-        );
+        const data = await fetchArtistCached(server.url, query.id, apiClientProps.signal);
 
         return {
             _itemType: LibraryItem.ALBUM_ARTIST,
             _serverId: server.id,
             _serverType: ServerType.YOUTUBE,
-            albumCount: data.albums?.length ?? 0,
+            albumCount: (data.albums?.length ?? 0) + (data.singles?.length ?? 0),
             biography: data.description ?? null,
             duration: null,
             genres: [],
@@ -292,6 +302,22 @@ export const YouTubeController: InternalControllerEndpoint = {
             userRating: null,
         };
     },
+    getAlbumArtistInfo: async (args) => {
+        const { apiClientProps, query } = args;
+        const server = apiClientProps.server;
+        if (!server) return null;
+
+        try {
+            const data = await fetchArtistCached(server.url, query.id, apiClientProps.signal);
+            return {
+                biography: data.description ?? null,
+                imageUrl: data.image_url ?? null,
+                similarArtists: null,
+            };
+        } catch {
+            return null;
+        }
+    },
     getAlbumArtistList: async () => ({ items: [], startIndex: 0, totalRecordCount: 0 }),
     getAlbumArtistListCount: async () => 0,
     getAlbumDetail: notImplemented('getAlbumDetail') as any,
@@ -303,12 +329,10 @@ export const YouTubeController: InternalControllerEndpoint = {
         const artistId = query.artistIds?.[0];
         if (!artistId) return { items: [], startIndex: 0, totalRecordCount: 0 };
 
-        const data = await ytFetch(
-            `${server.url}/artists/${encodeURIComponent(artistId)}`,
-            apiClientProps.signal,
-        );
+        const data = await fetchArtistCached(server.url, artistId, apiClientProps.signal);
 
-        const items = (data.albums || []).map((album: any) => ({
+        const allReleases = [...(data.albums || []), ...(data.singles || [])];
+        const items = allReleases.map((album: any) => ({
             _itemType: LibraryItem.ALBUM,
             _serverId: server.id,
             _serverType: ServerType.YOUTUBE,
