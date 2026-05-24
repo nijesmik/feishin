@@ -195,9 +195,13 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
             // Unavailable source — skip only if playing and under error limit
             if (error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
                 pauseBothPlayers();
-                consecutiveErrors.current += 1;
-                if (playerStatus === PlayerStatus.PLAYING && consecutiveErrors.current < MAX_CONSECUTIVE_ERRORS) {
-                    onEnded();
+                if (playerStatus === PlayerStatus.PLAYING) {
+                    consecutiveErrors.current += 1;
+                    if (consecutiveErrors.current < MAX_CONSECUTIVE_ERRORS) {
+                        onEnded();
+                    } else {
+                        onErrorPause();
+                    }
                 }
                 return;
             }
@@ -238,14 +242,9 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
     };
 
     useEffect(() => {
-        if (playerStatus === PlayerStatus.PLAYING) {
-            consecutiveErrors.current = 0;
-        }
-    }, [playerStatus]);
-
-    useEffect(() => {
         networkRetryCount1.current = 0;
         networkRetryCount2.current = 0;
+        consecutiveErrors.current = 0;
     }, [src1, src2]);
 
     // When not transitioning, ensure only the active player can play (e.g. after seek/prev during transition)
