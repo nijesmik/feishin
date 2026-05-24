@@ -199,6 +199,7 @@ const mapTrackToSong = (track: YouTubeTrack, serverId: string): Song => {
         path: null,
         peak: null,
         playCount: 0,
+        playlistItemId: track.playlist_item_id ?? undefined,
         releaseDate: track.published_at,
         releaseYear: track.published_at
             ? new Date(track.published_at).getFullYear()
@@ -210,7 +211,6 @@ const mapTrackToSong = (track: YouTubeTrack, serverId: string): Song => {
         trackNumber: 0,
         trackSubtitle: null,
         updatedAt: track.published_at,
-        playlistItemId: track.playlist_item_id ?? undefined,
         userFavorite: false,
         userRating: null,
     };
@@ -546,14 +546,14 @@ export const YouTubeController: InternalControllerEndpoint = {
         const server = apiClientProps.server;
         if (!server) throw new Error('No server');
 
-        await fetch(`${server.url}/playlists/${query.id}/items`, {
+        const res = await fetch(`${server.url}/playlists/${query.id}/items`, {
             method: 'DELETE',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ playlist_item_ids: query.songId }),
-        }).then((res) => {
-            if (!res.ok) throw new Error(`Failed to remove tracks: ${res.status}`);
         });
+
+        if (!res.ok) throw new Error(`Failed to remove tracks: ${res.status}`);
 
         return null;
     },
