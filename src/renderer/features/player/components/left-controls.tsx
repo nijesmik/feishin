@@ -260,6 +260,7 @@ export const LeftControls = () => {
                                 )}
                                 onClick={stopPropagation}
                             >
+                                <VerifiedArtistBadge artistId={artists?.[0]?.id} />
                                 <JoinedArtists
                                     artistName={currentSong?.artistName || ''}
                                     artists={artists || []}
@@ -272,7 +273,6 @@ export const LeftControls = () => {
                                         size: 'md',
                                     }}
                                 />
-                                <VerifiedArtistBadge artistId={artists?.[0]?.id} />
                             </div>
                             <div
                                 className={clsx(
