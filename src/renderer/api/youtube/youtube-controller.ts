@@ -23,6 +23,7 @@ interface YouTubeTrack {
     published_at: string;
     thumbnails: Record<string, string | null>;
     album_name: string | null;
+    playlist_item_id: string | null;
 }
 
 interface YouTubePlaylistSummary {
@@ -209,6 +210,7 @@ const mapTrackToSong = (track: YouTubeTrack, serverId: string): Song => {
         trackNumber: 0,
         trackSubtitle: null,
         updatedAt: track.published_at,
+        playlistItemId: track.playlist_item_id ?? undefined,
         userFavorite: false,
         userRating: null,
     };
@@ -539,7 +541,22 @@ export const YouTubeController: InternalControllerEndpoint = {
             name: me.display_name,
         };
     },
-    removeFromPlaylist: notImplemented('removeFromPlaylist') as any,
+    removeFromPlaylist: async (args) => {
+        const { apiClientProps, query } = args;
+        const server = apiClientProps.server;
+        if (!server) throw new Error('No server');
+
+        await fetch(`${server.url}/playlists/${query.id}/items`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ playlist_item_ids: query.songId }),
+        }).then((res) => {
+            if (!res.ok) throw new Error(`Failed to remove tracks: ${res.status}`);
+        });
+
+        return null;
+    },
     replacePlaylist: notImplemented('replacePlaylist') as any,
     savePlayQueue: async () => {},
     scrobble: async () => null,
