@@ -144,7 +144,7 @@ export const fetchMe = async (serverUrl: string): Promise<YouTubeMeResponse> => 
     return res.json();
 };
 
-const mapTrackToSong = (track: YouTubeTrack, serverId: string): Song => {
+const mapTrackToSong = (track: YouTubeTrack, serverId: string, playlistId?: string): Song => {
     const thumbUrl =
         track.thumbnails.maxres ||
         track.thumbnails.high ||
@@ -200,6 +200,7 @@ const mapTrackToSong = (track: YouTubeTrack, serverId: string): Song => {
         peak: null,
         playCount: 0,
         playlistItemId: track.playlist_item_id ?? undefined,
+        playlistId,
         releaseDate: track.published_at,
         releaseYear: track.published_at
             ? new Date(track.published_at).getFullYear()
@@ -478,7 +479,7 @@ export const YouTubeController: InternalControllerEndpoint = {
             `${server.url}/playlists/${query.id}/items`,
             apiClientProps.signal,
         );
-        const items = allTracks.map((t) => mapTrackToSong(t, server.id));
+        const items = allTracks.map((t) => mapTrackToSong(t, server.id, query.id));
 
         return {
             items,

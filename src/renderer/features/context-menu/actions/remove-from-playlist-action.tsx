@@ -18,7 +18,8 @@ interface RemoveFromPlaylistActionProps {
 export const RemoveFromPlaylistAction = ({ items }: RemoveFromPlaylistActionProps) => {
     const { t } = useTranslation();
     const serverId = useCurrentServerId();
-    const { playlistId } = useParams() as { playlistId?: string };
+    const { playlistId: paramPlaylistId } = useParams() as { playlistId?: string };
+    const playlistId = paramPlaylistId || items[0]?.playlistId;
     const removeFromPlaylistMutation = useRemoveFromPlaylist();
 
     const { ids } = useMemo(() => {

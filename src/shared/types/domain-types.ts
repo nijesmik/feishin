@@ -407,6 +407,7 @@ export type Song = {
     peak: GainInfo | null;
     playCount: number;
     playlistItemId?: string;
+    playlistId?: string;
     releaseDate: null | PartialIsoDateString;
     releaseYear: null | number;
     sampleRate: null | number;
