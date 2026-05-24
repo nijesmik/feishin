@@ -1,6 +1,6 @@
 import { LuCircleCheck } from 'react-icons/lu';
 
-const badgeStyle = { marginLeft: 2, color: '#1a9fff' } as const;
+import styles from './verified-artist-badge.module.css';
 
 interface VerifiedArtistBadgeProps {
     artistId: string | undefined;
@@ -8,5 +8,5 @@ interface VerifiedArtistBadgeProps {
 
 export const VerifiedArtistBadge = ({ artistId }: VerifiedArtistBadgeProps) => {
     if (!artistId?.endsWith(' - Topic')) return null;
-    return <LuCircleCheck size={14} style={badgeStyle} />;
+    return <LuCircleCheck className={styles.badge} size={14} />;
 };

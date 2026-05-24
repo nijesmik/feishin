@@ -31,3 +31,5 @@ This project is **web only**. Do not use `pnpm dev` (Electron) or `pnpm build` (
    - If there are many findings, split verification across multiple agents grouped by topic — don't overload a single agent.
 5. **Fix**: Apply fixes only for verified true positives.
 6. **Merge**: Merge the feature branch into `dev`.
+
+**No exceptions.** Every PR goes through steps 3-5 regardless of size, urgency, or whether it's a "hotfix." No skipping review.
