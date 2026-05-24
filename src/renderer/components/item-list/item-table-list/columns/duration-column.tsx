@@ -17,6 +17,9 @@ const DurationColumnBase = (props: ItemTableListInnerColumn) => {
     }, [row]);
 
     if (typeof row === 'number') {
+        if (row === 0) {
+            return <TableColumnTextContainer {...props}>-</TableColumnTextContainer>;
+        }
         return <TableColumnTextContainer {...props}>{formattedDuration}</TableColumnTextContainer>;
     }
 
