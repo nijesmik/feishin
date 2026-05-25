@@ -244,7 +244,6 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
     useEffect(() => {
         networkRetryCount1.current = 0;
         networkRetryCount2.current = 0;
-        consecutiveErrors.current = 0;
     }, [src1, src2]);
 
     // When not transitioning, ensure only the active player can play (e.g. after seek/prev during transition)
@@ -278,6 +277,7 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
             if (internal && internal instanceof HTMLAudioElement) {
                 internal.preservesPitch = preservesPitch;
             }
+            consecutiveErrors.current = 0;
             onStartedPlayer1(player);
         },
         [onStartedPlayer1, preservesPitch],
@@ -289,6 +289,7 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
             if (internal && internal instanceof HTMLAudioElement) {
                 internal.preservesPitch = preservesPitch;
             }
+            consecutiveErrors.current = 0;
             onStartedPlayer2(player);
         },
         [onStartedPlayer2, preservesPitch],
