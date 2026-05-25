@@ -42,6 +42,7 @@ interface WebPlayerEngineProps {
 
 const MAX_NETWORK_RETRIES = 5;
 const NETWORK_RETRY_DELAY_MS = 2000;
+const MAX_CONSECUTIVE_ERRORS = 3;
 
 // Credits: https://gist.github.com/novwhisky/8a1a0168b94f3b6abfaa?permalink_comment_id=1551393#gistcomment-1551393
 // This is used so that the player will always have an <audio> element. This means that
@@ -78,6 +79,7 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
     const networkRetryCount2 = useRef(0);
     const [ReactPlayerComponent, setReactPlayerComponent] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const consecutiveErrors = useRef(0);
 
     useEffect(() => {
         let isMounted = true;
@@ -190,11 +192,16 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
                 meta: { error },
             });
 
-            // Unavailable source — skip only if playing
+            // Unavailable source — skip only if playing and under error limit
             if (error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
                 pauseBothPlayers();
                 if (playerStatus === PlayerStatus.PLAYING) {
-                    onEnded();
+                    consecutiveErrors.current += 1;
+                    if (consecutiveErrors.current < MAX_CONSECUTIVE_ERRORS) {
+                        onEnded();
+                    } else {
+                        onErrorPause();
+                    }
                 }
                 return;
             }
@@ -237,6 +244,7 @@ export const WebPlayerEngine = (props: WebPlayerEngineProps) => {
     useEffect(() => {
         networkRetryCount1.current = 0;
         networkRetryCount2.current = 0;
+        consecutiveErrors.current = 0;
     }, [src1, src2]);
 
     // When not transitioning, ensure only the active player can play (e.g. after seek/prev during transition)
