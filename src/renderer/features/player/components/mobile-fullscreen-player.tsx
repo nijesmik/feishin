@@ -405,8 +405,13 @@ export const MobileFullscreenPlayer = () => {
                 return;
             }
 
+            const hasPlaylistContext = currentSong.playlistItemId && currentSong.playlistId;
+
             ContextMenuController.call({
-                cmd: { items: [currentSong], type: LibraryItem.SONG },
+                cmd: {
+                    items: [currentSong],
+                    type: hasPlaylistContext ? LibraryItem.PLAYLIST_SONG : LibraryItem.SONG,
+                },
                 event: e as unknown as MouseEvent<HTMLDivElement>,
             });
         },
