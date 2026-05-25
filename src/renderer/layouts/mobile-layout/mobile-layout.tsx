@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { AnimatePresence } from 'motion/react';
-import { Suspense } from 'react';
-import { Outlet } from 'react-router';
+import { Suspense, useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router';
 
 import styles from './mobile-layout.module.css';
 
@@ -24,6 +24,12 @@ interface MobileLayoutProps {
 
 export const MobileLayout = ({ shell }: MobileLayoutProps) => {
     const [sidebarOpened, { close: closeSidebar, open: openSidebar }] = useDisclosure(false);
+    const location = useLocation();
+
+    useEffect(() => {
+        closeSidebar();
+    }, [location.pathname, closeSidebar]);
+
     const {
         expanded: isFullScreenPlayerExpanded,
         visualizerExpanded: isFullScreenVisualizerExpanded,
