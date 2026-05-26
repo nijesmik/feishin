@@ -35,6 +35,35 @@ interface YouTubePlaylistSummary {
     privacy_status: string;
 }
 
+interface YouTubeAlbumTrack {
+    video_id: string;
+    title: string;
+    artists: { name: string; id: string | null }[];
+    duration_sec: number;
+    track_number: number;
+    is_explicit: boolean;
+}
+
+interface YouTubeAlbumDetail {
+    id: string;
+    title: string;
+    artists: { name: string; id: string | null }[];
+    year: string | null;
+    description: string | null;
+    cover_url: string | null;
+    track_count: number;
+    duration_sec: number;
+    audio_playlist_id: string;
+    tracks: YouTubeAlbumTrack[];
+    type: string;
+}
+
+interface YouTubeAlbumResolveResult {
+    browse_id: string;
+    name: string;
+    artist_name: string;
+}
+
 const ytFetch = async (url: string, signal?: AbortSignal): Promise<any> => {
     const res = await fetch(url, {
         credentials: 'include',
@@ -144,6 +173,24 @@ export const fetchMe = async (serverUrl: string): Promise<YouTubeMeResponse> => 
     return res.json();
 };
 
+export const resolveAlbumId = async (
+    serverUrl: string,
+    artist: string,
+    album: string,
+    signal?: AbortSignal,
+): Promise<string | null> => {
+    try {
+        const params = new URLSearchParams({ artist, album });
+        const data: YouTubeAlbumResolveResult = await ytFetch(
+            `${serverUrl}/albums/resolve?${params}`,
+            signal,
+        );
+        return data.browse_id;
+    } catch {
+        return null;
+    }
+};
+
 const mapTrackToSong = (track: YouTubeTrack, serverId: string, playlistId?: string): Song => {
     const thumbUrl =
         track.thumbnails.maxres ||
@@ -241,6 +288,77 @@ const cleanArtistName = (name: string): string => {
     return name.replace(/ - Topic$/, '');
 };
 
+const mapAlbumTrackToSong = (
+    track: YouTubeAlbumTrack,
+    album: YouTubeAlbumDetail,
+    serverId: string,
+): Song => {
+    const artistName = track.artists[0]?.name ?? '';
+
+    return {
+        _itemType: LibraryItem.SONG,
+        _serverId: serverId,
+        _serverType: ServerType.YOUTUBE,
+        album: album.title,
+        albumArtistName: album.artists[0]?.name ?? '',
+        albumArtists: album.artists.map((a) => ({
+            id: a.id ?? a.name,
+            imageId: null,
+            imageUrl: null,
+            name: a.name,
+            userFavorite: false,
+            userRating: null,
+        })),
+        albumId: album.id,
+        artistName,
+        artists: track.artists.map((a) => ({
+            id: a.id ?? a.name,
+            imageId: null,
+            imageUrl: null,
+            name: a.name,
+            userFavorite: false,
+            userRating: null,
+        })),
+        bitDepth: null,
+        bitRate: 0,
+        bpm: null,
+        channels: null,
+        comment: null,
+        compilation: null,
+        container: null,
+        createdAt: '',
+        discNumber: 1,
+        discSubtitle: null,
+        duration: track.duration_sec * 1000,
+        explicitStatus: null,
+        gain: null,
+        genres: [],
+        id: track.video_id,
+        imageId: album.cover_url ?? null,
+        imageUrl: null,
+        lastPlayedAt: null,
+        lyrics: null,
+        mbzRecordingId: null,
+        mbzTrackId: null,
+        name: track.title,
+        participants: null,
+        path: null,
+        peak: null,
+        playCount: 0,
+        releaseDate: null,
+        releaseYear: album.year ? parseInt(album.year, 10) : null,
+        sampleRate: null,
+        size: 0,
+        sortName: track.title,
+        tags: null,
+        trackNumber: track.track_number,
+        trackSubtitle: null,
+        updatedAt: '',
+        userFavorite: false,
+        userRating: null,
+    };
+};
+
 const artistCache = new Map<string, { promise: Promise<any>; expires: number }>();
 const ARTIST_CACHE_TTL = 60_000;
 
@@ -325,7 +443,72 @@ export const YouTubeController: InternalControllerEndpoint = {
     },
     getAlbumArtistList: async () => ({ items: [], startIndex: 0, totalRecordCount: 0 }),
     getAlbumArtistListCount: async () => 0,
-    getAlbumDetail: notImplemented('getAlbumDetail') as any,
+    getAlbumDetail: async (args) => {
+        const { apiClientProps, query } = args;
+        const server = apiClientProps.server;
+        if (!server) throw new Error('No server');
+
+        const data: YouTubeAlbumDetail = await ytFetch(
+            `${server.url}/albums/${encodeURIComponent(query.id)}`,
+            apiClientProps.signal,
+        );
+
+        const songs = data.tracks.map((t) => mapAlbumTrackToSong(t, data, server.id));
+
+        return {
+            _itemType: LibraryItem.ALBUM,
+            _serverId: server.id,
+            _serverType: ServerType.YOUTUBE,
+            albumArtistName: data.artists[0]?.name ?? '',
+            albumArtists: data.artists.map((a) => ({
+                id: a.id ?? a.name,
+                imageId: null,
+                imageUrl: null,
+                name: a.name,
+                userFavorite: false,
+                userRating: null,
+            })),
+            artists: data.artists.map((a) => ({
+                id: a.id ?? a.name,
+                imageId: null,
+                imageUrl: null,
+                name: a.name,
+                userFavorite: false,
+                userRating: null,
+            })),
+            comment: null,
+            createdAt: '',
+            duration: data.duration_sec * 1000,
+            explicitStatus: null,
+            genres: [],
+            id: data.id,
+            imageId: data.cover_url ?? null,
+            imageUrl: null,
+            isCompilation: null,
+            lastPlayedAt: null,
+            mbzId: null,
+            mbzReleaseGroupId: null,
+            name: data.title,
+            originalDate: null,
+            originalYear: data.year ? parseInt(data.year, 10) : 0,
+            participants: null,
+            playCount: null,
+            recordLabels: [],
+            releaseDate: null,
+            releaseType: null,
+            releaseTypes: [],
+            releaseYear: data.year ? parseInt(data.year, 10) : null,
+            size: null,
+            songCount: data.track_count,
+            songs,
+            sortName: data.title,
+            tags: null,
+            updatedAt: '',
+            userFavorite: false,
+            userRating: null,
+            version: null,
+        };
+    },
     getAlbumList: async (args) => {
         const { apiClientProps, query } = args;
         const server = apiClientProps.server;
