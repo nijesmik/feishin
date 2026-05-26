@@ -293,7 +293,7 @@ const mapAlbumTrackToSong = (
     album: YouTubeAlbumDetail,
     serverId: string,
 ): Song => {
-    const artistName = track.artists[0]?.name ?? '';
+    const artistName = track.artists[0]?.name ?? album.artists[0]?.name ?? '';
 
     return {
         _itemType: LibraryItem.SONG,
@@ -346,7 +346,7 @@ const mapAlbumTrackToSong = (
         peak: null,
         playCount: 0,
         releaseDate: null,
-        releaseYear: album.year ? parseInt(album.year, 10) : null,
+        releaseYear: album.year ? (Number.isNaN(parseInt(album.year, 10)) ? null : parseInt(album.year, 10)) : null,
         sampleRate: null,
         size: 0,
         sortName: track.title,
@@ -453,7 +453,7 @@ export const YouTubeController: InternalControllerEndpoint = {
             apiClientProps.signal,
         );
 
-        const songs = data.tracks.map((t) => mapAlbumTrackToSong(t, data, server.id));
+        const songs = (data.tracks ?? []).map((t) => mapAlbumTrackToSong(t, data, server.id));
 
         return {
             _itemType: LibraryItem.ALBUM,
@@ -490,14 +490,14 @@ export const YouTubeController: InternalControllerEndpoint = {
             mbzReleaseGroupId: null,
             name: data.title,
             originalDate: null,
-            originalYear: data.year ? parseInt(data.year, 10) : 0,
+            originalYear: data.year ? (Number.isNaN(parseInt(data.year, 10)) ? 0 : parseInt(data.year, 10)) : 0,
             participants: null,
             playCount: null,
             recordLabels: [],
             releaseDate: null,
             releaseType: null,
             releaseTypes: [],
-            releaseYear: data.year ? parseInt(data.year, 10) : null,
+            releaseYear: data.year ? (Number.isNaN(parseInt(data.year, 10)) ? null : parseInt(data.year, 10)) : null,
             size: null,
             songCount: data.track_count,
             songs,

@@ -62,33 +62,7 @@ const AlbumColumn = (props: ItemTableListInnerColumn) => {
     );
 
     if (typeof row === 'string') {
-        // Non-YouTube server with albumId — standard link
-        if (albumId && albumPath && !isYouTube) {
-            return (
-                <TableColumnContainer {...props}>
-                    <div
-                        className={clsx(styles.albumContainer, {
-                            [styles.compact]: props.size === 'compact',
-                            [styles.large]: props.size === 'large',
-                        })}
-                    >
-                        <Text
-                            className={styles.albumLink}
-                            component={Link}
-                            isLink
-                            isMuted
-                            isNoSelect
-                            state={{ item: song }}
-                            to={albumPath}
-                        >
-                            {row}
-                        </Text>
-                    </div>
-                </TableColumnContainer>
-            );
-        }
-
-        // YouTube server with album name — lazy resolve on click
+        // YouTube server with album name but no albumId — lazy resolve on click
         if (hasAlbumName) {
             return (
                 <TableColumnContainer {...props}>
@@ -114,7 +88,7 @@ const AlbumColumn = (props: ItemTableListInnerColumn) => {
             );
         }
 
-        // YouTube with albumId (from artist page navigation) — standard link
+        // Any server with albumId — standard link
         if (albumId && albumPath) {
             return (
                 <TableColumnContainer {...props}>
